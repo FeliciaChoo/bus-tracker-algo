@@ -5,4 +5,4 @@ COPY . /project
 RUN  cd /project && mvn package
 
 #run the spring boot application
-ENTRYPOINT ["java", "-jar","/project/target/bus-tracker-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar","-Dspring.profiles.active=prod","/project/target/bus-tracker-0.0.1-SNAPSHOT.jar"]
