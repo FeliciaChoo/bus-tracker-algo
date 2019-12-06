@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -31,10 +32,14 @@ public class BusTrackerResource {
     }
 
     @RequestMapping(method=RequestMethod.POST)
-    public ResponseEntity<List<DublinBusGPSSample>> insert(@RequestBody StandardDto objDto) {
-        //TODO PV Criar converter
-        long fromDate = TimeUnit.SECONDS.toMicros(objDto.getFromDate().toEpochSecond());
-        long toDate = TimeUnit.SECONDS.toMicros(objDto.getToDate().toEpochSecond());
+    public ResponseEntity<List<DublinBusGPSSample>> findByDateBetween(@RequestBody StandardDto objDto) {
+
+        LocalDateTime dateGreaterThan = LocalDateTime.of(objDto.getTimeFrame(),objDto.getStartTime());
+        LocalDateTime dateLesserThan = LocalDateTime.of(objDto.getTimeFrame(),objDto.getFinishTime());
+
+        //falta converter e mandar time zone pela request
+        long fromDate = TimeUnit.SECONDS.toMicros(dateGreaterThan.toEpochSecond(ZoneOffset.UTC));
+        long toDate = TimeUnit.SECONDS.toMicros(dateLesserThan.toEpochSecond(ZoneOffset.UTC));
         List<DublinBusGPSSample> objReturn = service.findByTimestampBetween(fromDate, toDate);
         return ResponseEntity.ok().body(objReturn);
     }

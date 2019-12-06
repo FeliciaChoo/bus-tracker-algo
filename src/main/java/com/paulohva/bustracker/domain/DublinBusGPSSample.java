@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 
 @Document(collection = "dublinBusGPSSample")
@@ -12,14 +13,14 @@ public class DublinBusGPSSample implements Serializable {
 
     @Id
     private String id;
-    private LocalDate timeFrame;
+    private String timeFrame;
     private String operator;
     private long timestamp;
 
     public DublinBusGPSSample() {
     }
 
-    public DublinBusGPSSample(String id, LocalDate timeFrame, String operator, long timestamp) {
+    public DublinBusGPSSample(String id, String timeFrame, String operator, long timestamp) {
         this.id = id;
         this.timeFrame = timeFrame;
         this.operator = operator;
@@ -42,11 +43,11 @@ public class DublinBusGPSSample implements Serializable {
         this.id = id;
     }
 
-    public LocalDate getTimeFrame() {
+    public String getTimeFrame() {
         return timeFrame;
     }
 
-    public void setTimeFrame(LocalDate timeFrame) {
+    public void setTimeFrame(String timeFrame) {
         this.timeFrame = timeFrame;
     }
 
