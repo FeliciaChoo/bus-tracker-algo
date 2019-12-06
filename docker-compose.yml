@@ -17,3 +17,11 @@ services:
       - "27017:27017"
     environment:
       - AUTH=no
+  mongo_seed:
+    image: "mongo:4.0.11"
+    links:
+      - mongo
+    volumes:
+      - ./mongo-seed:/mongo-seed
+    command:
+      /mongo-seed/import.sh
