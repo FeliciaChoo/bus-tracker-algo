@@ -16,6 +16,8 @@ public interface DublinBusGPSSampleRepository extends MongoRepository<DublinBusG
 
     List<DublinBusGPSSample> findByTimestampBetween(long timestampGT, long timestampLT);
 
-    @Query("[ { $match: { timestamp: { $gt: 70, $lt: 90 } } }, { $group: { _id : \"$operator\" } }]")
-    List<Operator> findAllOperatorsByTimeframe(long timestampGT, long timestampLT);
+    List<Operator> findOperatorDistinctByTimestampBetween(long timestampGT, long timestampLT);
+
+
+
 }

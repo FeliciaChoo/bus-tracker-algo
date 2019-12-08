@@ -16,15 +16,17 @@ public class DublinBusGPSSample implements Serializable {
     private String timeFrame;
     private String operator;
     private long timestamp;
+    private String vehicleID;
 
     public DublinBusGPSSample() {
     }
 
-    public DublinBusGPSSample(String id, String timeFrame, String operator, long timestamp) {
+    public DublinBusGPSSample(String id, String timeFrame, String operator, long timestamp, String vehicleID) {
         this.id = id;
         this.timeFrame = timeFrame;
         this.operator = operator;
         this.timestamp = timestamp;
+        this.vehicleID = vehicleID;
     }
 
     public long getTimestamp() {
@@ -57,6 +59,14 @@ public class DublinBusGPSSample implements Serializable {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    public String getVehicleID() {
+        return vehicleID;
+    }
+
+    public void setVehicleID(String vehicleID) {
+        this.vehicleID = vehicleID;
     }
 
     @Override
