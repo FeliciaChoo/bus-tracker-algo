@@ -5,6 +5,7 @@ import com.paulohva.bustracker.services.DublinkedDataService;
 import com.paulohva.bustracker.util.ConverterUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,8 +33,11 @@ public class FleetResource {
     @ApiOperation(value = "Find running fleet by a time frame", nickname = "find")
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<Fleet>> find(
+            @ApiParam(value = "Date that need to be considered for filter. Must be in the format yyyy/MM/dd", format = "time", required = true)
             @RequestParam(value = "date", required = true) String date,
+            @ApiParam(value = "Start time that need to be considered for filter. Must be in the format HH:MM", format = "time", required = true)
             @RequestParam(value = "startTime", required = true) String startTime,
+            @ApiParam(value = "End time that need to be considered for filter. Must be in the format HH:MM", format = "time", required = true)
             @RequestParam(value = "endTime", required = true) String endTime) {
         LocalDateTime startDateTime = ConverterUtils.getLocalDateTimeFromString(date, startTime);
         LocalDateTime endDateTime = ConverterUtils.getLocalDateTimeFromString(date, endTime);
