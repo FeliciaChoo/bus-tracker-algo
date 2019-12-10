@@ -27,6 +27,7 @@ public class DublinkedDataRepoImpl implements DublinkedDataCustom {
 
     @Override
     public List<Fleet> findOperators(long fromDate, long toDate) {
+        //Build a aggregation operation with the search conditions
         Aggregation agg = newAggregation(
                 match(Criteria.where("timestamp").lte(toDate)),
                 match(Criteria.where("timestamp").gte(fromDate)),
@@ -41,14 +42,13 @@ public class DublinkedDataRepoImpl implements DublinkedDataCustom {
 
     @Override
     public List<Vehicle> findVehiclesByOperator(long fromDate, long toDate, String operator, boolean onlyAtStop) {
+        //Build a aggregation operation list with the search conditions
         List<AggregationOperation> operations = new ArrayList<AggregationOperation>();
         operations.add(Aggregation.match(Criteria.where("timestamp").gte(fromDate).lte(toDate)));
         operations.add(Aggregation.match(Criteria.where("operator").is(operator)));
-
-        if(onlyAtStop) {
+        if (onlyAtStop) {
             operations.add(Aggregation.match(Criteria.where("atStop").is(1)));
         }
-
         operations.add(Aggregation.group("vehicleID"));
         Aggregation agg = newAggregation(operations);
 
@@ -60,13 +60,10 @@ public class DublinkedDataRepoImpl implements DublinkedDataCustom {
 
     @Override
     public List<Trace> findTraceByVehicle(long fromDate, long toDate, int vehicleID) {
+        //Build a aggregation operation list with the search conditions
         List<AggregationOperation> operations = new ArrayList<AggregationOperation>();
-
-        //operations.add(Aggregation.project("timestamp", "lonWGS84", "latWGS84"));
-
         operations.add(Aggregation.match(Criteria.where("timestamp").gte(fromDate).lte(toDate)));
         operations.add(Aggregation.match(Criteria.where("vehicleID").is(vehicleID)));
-
         operations.add(Aggregation.sort(new Sort(Sort.Direction.ASC, "timestamp")));
         Aggregation agg = newAggregation(operations);
 

@@ -2,6 +2,7 @@ package com.paulohva.bustracker.api;
 
 import com.paulohva.bustracker.dto.Fleet;
 import com.paulohva.bustracker.services.DublinkedDataService;
+import com.paulohva.bustracker.util.ConverterUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
-@RequestMapping(value="/fleet")
+@RequestMapping(value = "/fleet")
 public class FleetResource {
 
     private DublinkedDataService service;
@@ -29,23 +30,15 @@ public class FleetResource {
     }
 
     @ApiOperation(value = "Find running fleet by a time frame", nickname = "find")
-    @RequestMapping(method= RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<Fleet>> find(
-            @RequestParam(value="date", required = true) String date,
-            @RequestParam(value="startTime", required = true) String startTime,
-            @RequestParam(value="endTime",required = true) String endTime) {
-
-        LocalDate typedDate = LocalDate.parse(date);
-        LocalTime typedStartTime = LocalTime.parse(startTime);
-        LocalTime typedEndTime = LocalTime.parse(endTime);
-
-        LocalDateTime dateGreaterThan = LocalDateTime.of(typedDate,typedStartTime);
-        LocalDateTime dateLesserThan = LocalDateTime.of(typedDate,typedEndTime);
-
-        //falta converter e mandar time zone pela request
-        long fromDate = TimeUnit.SECONDS.toMicros(dateGreaterThan.toEpochSecond(ZoneOffset.UTC));
-        long toDate = TimeUnit.SECONDS.toMicros(dateLesserThan.toEpochSecond(ZoneOffset.UTC));
-        List<Fleet> obj = service.findOperators(fromDate, toDate);
+            @RequestParam(value = "date", required = true) String date,
+            @RequestParam(value = "startTime", required = true) String startTime,
+            @RequestParam(value = "endTime", required = true) String endTime) {
+        LocalDateTime startDateTime = ConverterUtils.getLocalDateTimeFromString(date, startTime);
+        LocalDateTime endDateTime = ConverterUtils.getLocalDateTimeFromString(date, endTime);
+        List<Fleet> obj = service.findOperators(ConverterUtils.getMicrosecondsFromLocalDateTime(startDateTime)
+                , ConverterUtils.getMicrosecondsFromLocalDateTime(endDateTime));
         return ResponseEntity.ok().body(obj);
     }
 }

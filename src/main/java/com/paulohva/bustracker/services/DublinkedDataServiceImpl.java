@@ -24,11 +24,11 @@ public class DublinkedDataServiceImpl implements DublinkedDataService {
 
     @Override
     public List<Fleet> findOperators(long fromDate, long toDate) {
-        return repo.findOperators(fromDate,toDate);
+        return repo.findOperators(fromDate, toDate);
     }
 
     @Override
     public List<Trace> findTraceByVehicle(long fromDate, long toDate, int vehicleID) {
-        return repo.findTraceByVehicle(fromDate,toDate,vehicleID);
+        return repo.findTraceByVehicle(fromDate, toDate, vehicleID);
     }
 }
