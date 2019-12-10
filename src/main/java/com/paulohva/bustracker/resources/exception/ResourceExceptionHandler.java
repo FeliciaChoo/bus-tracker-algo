@@ -1,12 +1,12 @@
 package com.paulohva.bustracker.resources.exception;
 
-import javax.servlet.http.HttpServletRequest;
-
+import com.paulohva.bustracker.services.exception.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import com.paulohva.bustracker.services.exception.ObjectNotFoundException;
+
+import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {

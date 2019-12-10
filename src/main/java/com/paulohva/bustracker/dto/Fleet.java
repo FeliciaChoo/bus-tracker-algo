@@ -1,20 +1,19 @@
 package com.paulohva.bustracker.dto;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 
-public class Operator implements Serializable {
+public class Fleet implements Serializable {
 
     @Id
     private String operator;
 
-    public Operator(String operator) {
+    public Fleet(String operator) {
         this.operator = operator;
     }
 
-    public Operator() {
+    public Fleet() {
     }
 
     public String getOperator() {
