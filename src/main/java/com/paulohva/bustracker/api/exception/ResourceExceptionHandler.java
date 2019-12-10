@@ -1,4 +1,4 @@
-package com.paulohva.bustracker.resources.exception;
+package com.paulohva.bustracker.api.exception;
 
 import com.paulohva.bustracker.services.exception.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;

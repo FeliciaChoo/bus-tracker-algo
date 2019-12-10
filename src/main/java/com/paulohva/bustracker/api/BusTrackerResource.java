@@ -1,4 +1,4 @@
-package com.paulohva.bustracker.resources;
+package com.paulohva.bustracker.api;
 
 import com.paulohva.bustracker.dto.Fleet;
 import com.paulohva.bustracker.dto.Trace;
