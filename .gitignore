@@ -30,4 +30,5 @@ build/
 ### VS Code ###
 .vscode/
 
+### mongodb seed data ###
 /mongo-seed/*.csv

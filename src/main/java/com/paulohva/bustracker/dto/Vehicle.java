@@ -2,15 +2,17 @@ package com.paulohva.bustracker.dto;
 
 import org.springframework.data.annotation.Id;
 
-public class VehicleID {
+import java.io.Serializable;
+
+public class Vehicle implements Serializable {
     @Id
     private String vehicleID;
 
-    public VehicleID(String vehicleID) {
+    public Vehicle(String vehicleID) {
         this.vehicleID = vehicleID;
     }
 
-    public VehicleID() {
+    public Vehicle() {
     }
 
     public String getVehicleID() {

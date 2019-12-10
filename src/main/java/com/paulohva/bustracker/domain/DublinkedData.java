@@ -4,12 +4,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 @Document(collection = "dublinBusGPSSample")
-public class DublinBusGPSSample implements Serializable {
+public class DublinkedData implements Serializable {
 
     @Id
     private String id;
@@ -17,16 +15,18 @@ public class DublinBusGPSSample implements Serializable {
     private String operator;
     private long timestamp;
     private String vehicleID;
+    private int atStop;
 
-    public DublinBusGPSSample() {
+    public DublinkedData() {
     }
 
-    public DublinBusGPSSample(String id, String timeFrame, String operator, long timestamp, String vehicleID) {
+    public DublinkedData(String id, String timeFrame, String operator, long timestamp, String vehicleID, int atStop) {
         this.id = id;
         this.timeFrame = timeFrame;
         this.operator = operator;
         this.timestamp = timestamp;
         this.vehicleID = vehicleID;
+        this.atStop = atStop;
     }
 
     public long getTimestamp() {
@@ -69,12 +69,20 @@ public class DublinBusGPSSample implements Serializable {
         this.vehicleID = vehicleID;
     }
 
+    public int isAtStop() {
+        return atStop;
+    }
+
+    public void setAtStop(int atStop) {
+        this.atStop = atStop;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DublinBusGPSSample dublinBusGPSSample = (DublinBusGPSSample) o;
-        return Objects.equals(id, dublinBusGPSSample.id);
+        DublinkedData dublinkedData = (DublinkedData) o;
+        return Objects.equals(id, dublinkedData.id);
     }
 
     @Override
