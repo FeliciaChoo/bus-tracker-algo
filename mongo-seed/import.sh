@@ -1,6 +1,11 @@
 #!/bin/bash
-if [ ! -f "/mongo-seed/dublin-bus-sample.csv" ]; then
-  echo "The file 'dublin-bus-sample.csv' does not exist. Skiping mongo-seed task."
-else
-  mongoimport --host=mongo -d busTracker -c dublinBusGPSSample --type csv --file /mongo-seed/dublin-bus-sample.csv --fields timestamp,lineID,direction,journeyPatternID,timeFrame,vehicleJourneyID,operator,congestion,lonWGS84,latWGS84,delay,blockID,vehicleID,stopID,atStop
-fi
+
+mongoimport --uri "mongodb://localhost:27017/bustracker" \
+  --collection stops \
+  --jsonArray \
+  --file ./stops.json
+
+mongoimport --uri "mongodb://localhost:27017/bustracker" \
+  --collection dublinked_data \
+  --jsonArray \
+  --file ./traces.json

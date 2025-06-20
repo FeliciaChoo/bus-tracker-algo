@@ -11,17 +11,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.Optional;
+
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.paulohva.bustracker.api"))
-                .build()
-                .apiInfo(apiInfo());
-    }
 
     ApiInfo apiInfo() {
         return new ApiInfoBuilder()
@@ -30,5 +24,19 @@ public class SwaggerConfig {
                 .version("1.0.0")
                 .contact(new Contact("Paulo Valadares","", "paulohva@gmail.com"))
                 .build();
+    }
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.paulohva.bustracker.api"))
+                .paths(PathSelectors.any())
+                .build()
+                .apiInfo(apiInfo())
+                // Add these protections:
+                .directModelSubstitute(Long.class, String.class)
+                .directModelSubstitute(Integer.class, String.class)
+                .directModelSubstitute(Double.class, String.class)
+                .genericModelSubstitutes(Optional.class);
     }
 }

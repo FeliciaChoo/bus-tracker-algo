@@ -1,27 +1,23 @@
 package com.paulohva.bustracker.api;
 
+import com.paulohva.bustracker.domain.DublinkedData;
 import com.paulohva.bustracker.dto.Trace;
 import com.paulohva.bustracker.services.DublinkedDataService;
 import com.paulohva.bustracker.util.ConverterUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/activity")
 public class ActivityResource {
-    private DublinkedDataService service;
+
+    private final DublinkedDataService service;
 
     public ActivityResource(DublinkedDataService service) {
         this.service = service;
@@ -29,19 +25,32 @@ public class ActivityResource {
 
     @ApiOperation(value = "Find all activity of a vehicle in a time frame", nickname = "findByVehicle")
     @RequestMapping(value = "/findByVehicle", method = RequestMethod.GET)
-    public ResponseEntity<List<Trace>> searchTraceByVehicleID(
+    public ResponseEntity<List<DublinkedData>> searchTraceByVehicleID(
             @ApiParam(value = "Date that need to be considered for filter. Must be in the format yyyy/MM/dd.", required = true)
-            @RequestParam(value = "date", required = true) String date,
-            @ApiParam(value = "Start time that need to be considered for filter. Must be in the format HH:MM", format = "time", required = true)
-            @RequestParam(value = "startTime", required = true) String startTime,
-            @ApiParam(value = "End time that need to be considered for filter. Must be in the format HH:MM", format = "time", required = true)
-            @RequestParam(value = "endTime", required = true) String endTime,
-            @ApiParam(value = "Vehicle identification know as 'vehicleID'", format = "time", required = true)
-            @RequestParam(value = "vehicleID", required = true) int vehicleID) {
+            @RequestParam("date") String date,
+            @ApiParam(value = "Start time that need to be considered for filter. Must be in the format HH:MM", required = true)
+            @RequestParam("startTime") String startTime,
+            @ApiParam(value = "End time that need to be considered for filter. Must be in the format HH:MM", required = true)
+            @RequestParam("endTime") String endTime,
+            @ApiParam(value = "Vehicle identification known as 'vehicleID'", required = true)
+            @RequestParam("vehicleID") int vehicleID) {
+
+        // Convert times
         LocalDateTime startDateTime = ConverterUtils.getLocalDateTimeFromString(date, startTime);
         LocalDateTime endDateTime = ConverterUtils.getLocalDateTimeFromString(date, endTime);
-        List<Trace> obj = service.findTraceByVehicle(ConverterUtils.getMicrosecondsFromLocalDateTime(startDateTime)
-                , ConverterUtils.getMicrosecondsFromLocalDateTime(endDateTime), vehicleID);
+
+        long startMicros = ConverterUtils.getMicrosecondsFromLocalDateTime(startDateTime);
+        long endMicros = ConverterUtils.getMicrosecondsFromLocalDateTime(endDateTime);
+
+        // 🔍 Debug: Print the timestamp range
+        System.out.println("🔍 Fetching vehicleID: " + vehicleID);
+        System.out.println("🔍 Start: " + startDateTime + " → " + startMicros);
+        System.out.println("🔍 End:   " + endDateTime + " → " + endMicros);
+
+        // ✅ TEMP: Ignore time filtering for testing
+        // List<Trace> obj = service.findTraceByVehicle(startMicros, endMicros, vehicleID);
+        List<DublinkedData> obj = service.findTraceByVehicle(vehicleID); // ← try this version first!
+
         return ResponseEntity.ok().body(obj);
     }
 }

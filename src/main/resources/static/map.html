@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Smart Bus Tracker - UPM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            margin-top: 1em;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 1em;
+        }
+        .control-panel {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        input, button, select {
+            margin-bottom: 0.8em;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .loading {
+            background-color: #fff3cd;
+        }
+        .error {
+            background-color: #f8d7da;
+        }
+        .success {
+            background-color: #d4edda;
+        }
+        .bus-stop-marker {
+            width: 20px;
+            height: 20px;
+            background: #ff6600;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .nearest-stop-marker {
+            font-size: 20px;
+            text-align: center;
+        }
+        .stop-popup {
+            min-width: 200px;
+        }
+        .stop-popup h4 {
+            margin: 0 0 5px 0;
+            color: #0066cc;
+        }
+        .stop-type {
+            font-weight: bold;
+            margin: 5px 0 0 0;
+            padding: 3px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .stop-type.start {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .stop-type.end {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .stop-type.intermediate {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
+</head>
+<body>
+
+<h1>UPM Smart Bus Tracker</h1>
+
+<div class="control-panel">
+    <h3>Track Bus Route</h3>
+    <form id="trackForm">
+        <label for="vehicleID">Bus Number:</label>
+        <select id="vehicleID">
+            <option value="2001">Bus 2001</option>
+            <option value="2002">Bus 2002</option>
+            <option value="2003">Bus 2003</option>
+        </select><br />
+        <button type="button" id="testORS">Test ORS Route</button>
+        <button type="button" id="trackLiveBtn">Track Live Location</button>
+        <button type="button" id="scheduleByDemandBtn">Show Available Bus Routes</button>
+    </form>
+    <div id="status" class="status"></div>
+</div>
+
+<div id="map"></div>
+
+<script>
+    const map = L.map('map').setView([2.9926, 101.715], 16);
+    let busMarker = null;
+    let busRoute = null;
+    let liveTrackingInterval = null;
+    let stopMarkers = [];
+
+    // Add simulated bus data here
+    const simulatedBusData = {
+        '2001': {
+            latWGS84: 2.9998,
+            lonWGS84: 101.7104,
+            timestamp: new Date(),
+            name: "Bus 2001 at FSKTM"
+        },
+        '2002': {
+            latWGS84: 3.0007,
+            lonWGS84: 101.7051,
+            timestamp: new Date(),
+            name: "Bus 2002 at Science Faculty"
+        },
+        '2003': {
+            latWGS84: 3.0024,
+            lonWGS84: 101.7059,
+            timestamp: new Date(),
+            name: "Bus 2003 at UPM Library"
+        }
+    };
+
+
+    const baseTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+    });
+    baseTile.addTo(map);
+
+    const statusDiv = document.getElementById('status');
+
+    function showStatus(message, type = 'info') {
+        statusDiv.textContent = message;
+        statusDiv.className = 'status ' + type;
+    }
+
+    document.getElementById('trackLiveBtn').addEventListener('click', () => {
+        const vehicleID = document.getElementById('vehicleID').value;
+
+        if (liveTrackingInterval) {
+            clearInterval(liveTrackingInterval);
+        }
+
+        if (busMarker) {
+            map.removeLayer(busMarker);
+        }
+        if (busRoute) {
+            map.removeLayer(busRoute);
+        }
+
+        showStatus("Starting tracking of bus " + vehicleID + "...", "loading");
+
+        const updateBusLocation = async () => {
+            try {
+                let busData;
+                let isSimulated = false;
+
+                // Try to get real data first
+                try {
+                    const res = await fetch(`http://localhost:8080/v1/api/routes/live/${vehicleID}`);
+                    if (res.ok) {
+                        busData = await res.json();
+                        if (!busData.latWGS84 || !busData.lonWGS84) {
+                            throw new Error("Invalid live data format");
+                        }
+                    } else {
+                        throw new Error("API request failed");
+                    }
+                } catch (err) {
+                    console.log("Using simulated data:", err.message);
+                    busData = {
+                        ...simulatedBusData[vehicleID],
+                        timestamp: new Date()
+                    };
+                    isSimulated = true;
+
+                    // Simulate movement for next update
+                    simulatedBusData[vehicleID].latWGS84 += (Math.random() - 0.5) * 0.0005;
+                    simulatedBusData[vehicleID].lonWGS84 += (Math.random() - 0.5) * 0.0005;
+                }
+
+                const busLatLng = [busData.latWGS84, busData.lonWGS84];
+
+                if (busMarker) {
+                    map.removeLayer(busMarker);
+                }
+
+                busMarker = L.marker(busLatLng, {
+                    icon: L.divIcon({
+                        className: 'bus-icon',
+                        html: '🚌',
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map).bindPopup(
+                    `<b>Bus ${vehicleID}</b><br>${isSimulated ? 'Simulated' : 'Live'} Location<br>`
+                    + `${busData.name || ''}<br>`
+                    + `Updated: ${new Date(busData.timestamp).toLocaleTimeString()}`
+                ).openPopup();
+
+                map.setView(busLatLng, 16);
+                showStatus(`${isSimulated ? 'Simulated' : 'Live'}: Bus ${vehicleID} at ${new Date(busData.timestamp).toLocaleTimeString()}`, "success");
+
+            } catch (err) {
+                console.error("Tracking error:", err);
+                showStatus("Error tracking bus: " + err.message, "error");
+            }
+        };
+
+        // Initial update
+        updateBusLocation();
+        // Set up periodic updates
+        liveTrackingInterval = setInterval(updateBusLocation, 10000);
+    });
+    document.getElementById('testORS').addEventListener('click', async () => {
+        showStatus("Requesting ORS test route...", "loading");
+
+        try {
+            const res = await fetch("http://localhost:8080/v1/api/routes/test-route");
+
+            // First check if response is OK
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Server error: ${res.status} - ${errorText}`);
+            }
+
+            const data = await res.json();
+            console.log("Test route data:", data); // Debug log
+
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error("Empty or invalid route data");
+            }
+
+            // Clear previous route if exists
+            if (busRoute) {
+                map.removeLayer(busRoute);
+            }
+
+            // Convert coordinates to LatLng array
+            const latLngs = data.map(p => {
+                if (!p[0] || !p[1]) {
+                    throw new Error("Invalid coordinate format");
+                }
+                return [p[0], p[1]];
+            });
+
+            // Create and display the polyline
+            busRoute = L.polyline(latLngs, {
+                color: 'blue',
+                weight: 5,
+                opacity: 0.8
+            }).addTo(map)
+                .bindPopup("ORS Test Route")
+                .openPopup();
+
+            map.fitBounds(busRoute.getBounds());
+            showStatus("ORS route loaded successfully", "success");
+
+        } catch (err) {
+            console.error("Error loading test route:", err);
+            showStatus("Failed to load route: " + err.message, "error");
+        }
+    });
+    document.getElementById('scheduleByDemandBtn').addEventListener('click', async () => {
+        showStatus("Calculating optimal bus routes...", "loading");
+
+        try {
+            // Clear previous routes and markers
+            stopMarkers.forEach(marker => map.removeLayer(marker));
+            stopMarkers = [];
+            if (busRoute) map.removeLayer(busRoute);
+
+            // 1. Fetch stops from API
+            console.log("Fetching stops from API...");
+            const stopsRes = await fetch('http://localhost:8080/v1/api/stops');
+
+            if (!stopsRes.ok) {
+                const errorText = await stopsRes.text();
+                console.error("Stops API Error:", errorText);
+                throw new Error(`Failed to fetch stops: ${stopsRes.status}`);
+            }
+
+            const stops = await stopsRes.json();
+            console.log("Received stops:", stops);
+
+            if (!Array.isArray(stops) || stops.length === 0) {
+                throw new Error("No stops data available");
+            }
+
+            // 2. Prepare optimization request
+            const requestBody = {
+                stops: stops.map((stop, index) => ({
+                    id: stop.id || `stop_${index}`,
+                    name: stop.name || `Stop ${index + 1}`,
+                    latitude: stop.latitude || stop.lat || stop.latWGS84,
+                    longitude: stop.longitude || stop.lng || stop.lonWGS84,
+                    demand: stop.demand || stop.checkInCount || 10
+                })),
+                options: {
+                    numberOfBuses: 3,
+                    capacityPerBus: 30,
+                    depotLocation: {
+                        latitude: 2.9926,  // UPM central location
+                        longitude: 101.715
+                    }
+                }
+            };
+            console.log("Sending to optimization API:", requestBody);
+
+            // 3. Request route optimization
+            const optimizeRes = await fetch('http://localhost:8080/v1/api/routes/optimized', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            // 4. Handle response
+            if (!optimizeRes.ok) {
+                const errorText = await optimizeRes.text();
+                console.error("Optimization API Error:", errorText);
+                throw new Error(`Optimization failed: ${optimizeRes.status}`);
+            }
+
+            const response = await optimizeRes.json();
+            console.log("Optimization response:", response);
+
+            // 5. Display results
+            if (response.routes && response.routes.length > 0) {
+                displayOptimizedRoutes(response.routes, stops);
+                showStatus(`Displaying ${response.routes.length} optimized routes`, "success");
+            } else if (response.path) {
+                // Handle case where response has single path instead of routes array
+                displayOptimizedRoutes([{ path: response.path }], stops);
+                showStatus("Displaying optimized route", "success");
+            } else {
+                console.warn("No routes in response, using fallback");
+                createFallbackRoutes(stops);
+                showStatus("No optimized routes - showing direct connections", "warning");
+            }
+
+        } catch (err) {
+            console.error("Route optimization error:", err);
+            showStatus("Failed: " + err.message, "error");
+        }
+    });
+
+    // Improved route display function
+    function displayOptimizedRoutes(routes, stops) {
+        const colors = ['#e6194b', '#3cb44b', '#4363d8']; // Red, Green, Blue
+        const allPoints = [];
+
+        routes.forEach((route, i) => {
+            if (!route.path || route.path.length < 2) {
+                console.warn(`Route ${i} has insufficient points`);
+                return;
+            }
+
+            // Convert path to LatLng array
+            const path = route.path.map(p => [p.lat, p.lng]);
+            allPoints.push(...path);
+
+            // Draw the route
+            L.polyline(path, {
+                color: colors[i % colors.length],
+                weight: 5,
+                opacity: 0.7,
+                dashArray: route.isOptimal ? null : '5,5'
+            }).addTo(map).bindPopup(`Bus Route ${i+1} (${route.distance ? `${route.distance.toFixed(1)}km` : ''})`);
+
+            // Add start/end markers if available
+            if (route.start) {
+                L.marker([route.start.lat, route.start.lng], {
+                    icon: L.divIcon({
+                        className: 'stop-type start',
+                        html: 'S',
+                        iconSize: [20, 20]
+                    })
+                }).addTo(map).bindPopup(`<b>Route ${i+1} Start</b>`);
+            }
+        });
+
+        // Add all stops as markers
+        stops.forEach((stop, i) => {
+            const marker = L.marker([stop.latitude, stop.longitude], {
+                icon: L.divIcon({
+                    className: 'bus-stop-marker',
+                    html: `<div>${i+1}</div>`,
+                    iconSize: [20, 20]
+                })
+            }).addTo(map).bindPopup(`
+            <b>${stop.name || 'Stop ' + (i+1)}</b><br>
+            Demand: ${stop.demand || 10} passengers
+        `);
+            stopMarkers.push(marker);
+        });
+
+        // Zoom to fit all points
+        if (allPoints.length > 0) {
+            map.fitBounds(L.latLngBounds(allPoints));
+        }
+    }
+
+    // Fallback route creation
+    function createFallbackRoutes(stops) {
+        if (stops.length < 2) return;
+
+        // Create simple path connecting all stops
+        const path = stops.map(s => [s.latitude, s.longitude]);
+
+        L.polyline(path, {
+            color: '#ff9900',
+            weight: 3,
+            opacity: 0.6,
+            dashArray: '5,5'
+        }).addTo(map).bindPopup("Direct Path (Fallback)");
+
+        // Add stop markers
+        stops.forEach((stop, i) => {
+            const marker = L.marker([stop.latitude, stop.longitude], {
+                icon: L.divIcon({
+                    className: 'bus-stop-marker',
+                    html: `<div>${i+1}</div>`,
+                    iconSize: [20, 20]
+                })
+            }).addTo(map).bindPopup(`
+            <b>${stop.name || 'Stop ' + (i+1)}</b><br>
+            Demand: ${stop.demand || 10} passengers
+        `);
+            stopMarkers.push(marker);
+        });
+
+        map.fitBounds(L.latLngBounds(path));
+    }
+    async function loadInitialStops() {
+        try {
+            const res = await fetch('http://localhost:8080/v1/api/stops');
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+            const stops = await res.json();
+
+            if (!Array.isArray(stops)) {
+                throw new Error("Invalid stops data format - expected array");
+            }
+
+            stops.forEach(stop => {
+                if (stop.name == null || stop.latitude == null || stop.longitude == null || stop.demand === undefined) {
+                    console.warn("Skipping invalid stop:", stop);
+                    return;
+                }
+
+                try {
+                    const stopMarker = L.marker([stop.latitude, stop.longitude], {
+                        icon: L.divIcon({
+                            className: 'initial-stop-icon',
+                            html: '<div class="bus-stop-marker" style="background:#6c757d;"></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map).bindPopup(`
+                        <div class="stop-popup">
+                            <h4>${stop.name}</h4>
+                            <p><strong>Demand:</strong> ${stop.demand} passengers</p>
+                        </div>
+                    `);
+                    stopMarkers.push(stopMarker);
+                } catch (err) {
+                    console.error("Failed to create marker for stop:", stop, err);
+                }
+            });
+        } catch (err) {
+            console.error("Could not load bus stops:", err);
+            showStatus("Failed to load bus stops: " + err.message, "error");
+        }
+    }
+
+    loadInitialStops();
+</script>
+
+</body>
+</html>

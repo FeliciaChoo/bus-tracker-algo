@@ -60,16 +60,20 @@ public class DublinkedDataRepoImpl implements DublinkedDataCustom {
 
     @Override
     public List<Trace> findTraceByVehicle(long fromDate, long toDate, int vehicleID) {
-        //Build a aggregation operation list with the search conditions
-        List<AggregationOperation> operations = new ArrayList<AggregationOperation>();
-        operations.add(Aggregation.match(Criteria.where("timestamp").gte(fromDate).lte(toDate)));
-        operations.add(Aggregation.match(Criteria.where("vehicleID").is(vehicleID)));
-        operations.add(Aggregation.sort(new Sort(Sort.Direction.ASC, "timestamp")));
-        Aggregation agg = newAggregation(operations);
+        return new ArrayList<>();
+    }
 
-        //Convert the aggregation result into a List
-        AggregationResults<Trace> groupResults
-                = mongoTemplate.aggregate(agg, DublinkedData.class, Trace.class);
-        return groupResults.getMappedResults();
+
+    public List<Trace> findTraceByVehicle(int vehicleID) {
+        // Match only vehicle ID, no time filtering
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("vehicleID").is(vehicleID)),
+                Aggregation.sort(Sort.Direction.ASC, "timestamp")
+        );
+
+        AggregationResults<Trace> results =
+                mongoTemplate.aggregate(agg, DublinkedData.class, Trace.class);
+
+        return results.getMappedResults();
     }
 }

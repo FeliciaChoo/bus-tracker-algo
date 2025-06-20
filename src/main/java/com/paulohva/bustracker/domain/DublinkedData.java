@@ -1,7 +1,9 @@
 package com.paulohva.bustracker.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -11,78 +13,99 @@ public class DublinkedData implements Serializable {
 
     @Id
     private String id;
+
+    @Field("timeFrame")
     private String timeFrame;
+
+    @Field("operator")
     private String operator;
+
+    @Field("timestamp")
     private long timestamp;
-    private String vehicleID;
+
+    @Field("vehicleID")
+    private int vehicleID;
+
+    @Field("atStop")
     private int atStop;
 
-    public DublinkedData() {
+    @Field("lat")  // ✅ Mongo field is "lat"
+    private double lat;
+
+    @Field("lng")  // ✅ Mongo field is "lng"
+    private double lon;
+
+    @Field("weather")
+    private String weather;
+
+    @Field("dayType")
+    private String dayType;
+
+    @Field("checkInCount")
+    private int checkInCount;
+
+    @Field("checkOutCount")
+    private int checkOutCount;
+
+    // 👇 Map frontend "demand" JSON key to checkInCount
+    @JsonProperty("demand")
+    public void setDemand(int demand) {
+        this.checkInCount = demand;
     }
 
-    public DublinkedData(String id, String timeFrame, String operator, long timestamp, String vehicleID, int atStop) {
-        this.id = id;
-        this.timeFrame = timeFrame;
-        this.operator = operator;
-        this.timestamp = timestamp;
-        this.vehicleID = vehicleID;
-        this.atStop = atStop;
-    }
+    public DublinkedData() {}
 
-    public long getTimestamp() {
-        return timestamp;
-    }
+    // Standard getters and setters
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getId() {
-        return id;
-    }
+    public String getTimeFrame() { return timeFrame; }
+    public void setTimeFrame(String timeFrame) { this.timeFrame = timeFrame; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getOperator() { return operator; }
+    public void setOperator(String operator) { this.operator = operator; }
 
-    public String getTimeFrame() {
-        return timeFrame;
-    }
+    public long getTimestamp() { return timestamp; }
+    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    public void setTimeFrame(String timeFrame) {
-        this.timeFrame = timeFrame;
-    }
+    public int getVehicleID() { return vehicleID; }
+    public void setVehicleID(int vehicleID) { this.vehicleID = vehicleID; }
 
-    public String getOperator() {
-        return operator;
-    }
+    public int getAtStop() { return atStop; }
+    public void setAtStop(int atStop) { this.atStop = atStop; }
 
-    public void setOperator(String operator) {
-        this.operator = operator;
-    }
+    public double getLat() { return lat; }
+    public void setLat(double lat) { this.lat = lat; }
 
-    public String getVehicleID() {
-        return vehicleID;
-    }
+    public double getLon() { return lon; }
+    public void setLon(double lon) { this.lon = lon; }
 
-    public void setVehicleID(String vehicleID) {
-        this.vehicleID = vehicleID;
-    }
+    // ✅ Used by backend routing logic
+    public double getLatWGS84() { return lat; }
+    public void setLatWGS84(double lat) { this.lat = lat; }
 
-    public int isAtStop() {
-        return atStop;
-    }
+    public double getLonWGS84() { return lon; }
+    public void setLonWGS84(double lon) { this.lon = lon; }
 
-    public void setAtStop(int atStop) {
-        this.atStop = atStop;
-    }
+    public String getWeather() { return weather; }
+    public void setWeather(String weather) { this.weather = weather; }
+
+    public String getDayType() { return dayType; }
+    public void setDayType(String dayType) { this.dayType = dayType; }
+
+    public int getCheckInCount() { return checkInCount; }
+    public void setCheckInCount(int checkInCount) { this.checkInCount = checkInCount; }
+
+    public int getCheckOutCount() { return checkOutCount; }
+    public void setCheckOutCount(int checkOutCount) { this.checkOutCount = checkOutCount; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DublinkedData dublinkedData = (DublinkedData) o;
-        return Objects.equals(id, dublinkedData.id);
+        if (!(o instanceof DublinkedData)) return false;
+        DublinkedData that = (DublinkedData) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override
