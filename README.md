@@ -1,78 +1,49 @@
-# bus-tracker
+🚍 Smart Campus Bus Scheduler
+Welcome to the Smart Campus Bus Scheduler – an intelligent and responsive system designed to improve the efficiency of campus bus operations at University X, a large academic institution with over 20,000 students and staff.
 
-## About Bus Tracker API
+🧭 Project Overview
+The current bus service at University X operates on fixed routes and static schedules, which has led to a number of challenges:
 
-An API that provides endpoints to retrieve data from a Dublin Bus GPS sample data in DUBLinked Metadata Standard.
+🚶‍♂️ Overcrowding during peak hours, often leaving students behind
 
-## Requirements
+🚌 Empty buses running during off-peak periods, wasting resources
 
-* JDK 8
-* Maven 3
-* MongoDB 4.0
+❌ Inflexible routes unable to respond to traffic jams or bus breakdowns
 
-or
+⌛ Unpredictable arrival times, resulting in delays and dissatisfaction
 
-* Docker
-* Docker Compose
+To address these issues, we propose a Smart Bus Scheduling System that leverages real-time data, dynamic algorithms, and smart routing to enhance the reliability and efficiency of campus transport.
 
-## How to run locally
+🌟 Key Features
+Live Data Integration
+Real-time GPS tracking of buses and sensors at bus stops for demand estimation.
 
-Download a CSV from this URL:
+Dynamic Route Adjustment
+Routes and schedules adjust automatically based on traffic conditions and student demand.
 
-  * https://data.gov.ie/dataset/dublin-bus-gps-sample-data-from-dublin-city-council-insight-project
+Peak Hour Load Balancing
+Intelligent algorithms distribute capacity efficiently to reduce overcrowding.
 
-Import a CSV file to a MongoDB with:
+Smart Alerts
+Notify users of delays, reroutes, or changes in schedule.
 
- * Database name: `busTracker` 
- * Collection name: `dublinBusGPSSample`
- * By default, MongoDB must be running at `localhost:27017`.
+Interactive Web Dashboard
+Visualize bus movements, predicted arrival times, and usage analytics.
 
-Git clone, build and run:
+📈 Benefits
+✅ Reduces wait time and missed rides
 
-```sh
-git clone git@github.com:paulohva/bus-tracker.git
-```
-```sh
-./mvn install
-```
-```sh
-./mvn spring-boot:run
-```
+✅ Minimizes fuel and resource waste
 
-## How to run using Docker Compose
+✅ Improves student and staff satisfaction
 
-Git clone the repository:
+✅ Enables scalable, real-time operations management
 
-```sh
-git clone git@github.com:paulohva/bus-tracker.git
-```
+🛠️ Tech Stack
+Backend: Spring Boot (Java), RESTful APIs
 
-Set execute permission to the import script:
+Frontend: HTML, CSS, JavaScript, Leaflet.js (for maps)
 
-```sh
-chmod +x mongo-seed/import.sh
-```
+Database: MongoDB
 
-Download a CSV from this URL:
 
-```url
-https://data.gov.ie/dataset/dublin-bus-gps-sample-data-from-dublin-city-council-insight-project
-```
-
-Rename a CSV file to `dublin-bus-sample.csv` and put into the `mongo-seed` folder.
-
-Run Docker Compose command from the project root folder:
-
-```sh
-./docker-compose up --build
-```
-
-## API specifification
-
-The API documentation was made in using Swagger. After doing the build&run steps, use the link bellow:
-
-* http://localhost:8080/v1/swagger-ui.html
-
-## Testing the API
-
-Use a tool that can create HTTP requests, like Postman (https://www.getpostman.com/)
