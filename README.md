@@ -1,49 +1,64 @@
-🚍 Smart Campus Bus Scheduler
-Welcome to the Smart Campus Bus Scheduler – an intelligent and responsive system designed to improve the efficiency of campus bus operations at University X, a large academic institution with over 20,000 students and staff.
+# 🚍 Smart Campus Bus Scheduler
 
-🧭 Project Overview
-The current bus service at University X operates on fixed routes and static schedules, which has led to a number of challenges:
+Welcome to the **Smart Campus Bus Scheduler**, an intelligent and responsive system designed to optimize campus transportation for **University X**—a large academic institution with over **20,000 students and staff**.
 
-🚶‍♂️ Overcrowding during peak hours, often leaving students behind
+---
 
-🚌 Empty buses running during off-peak periods, wasting resources
+## 📌 Problem Statement
 
-❌ Inflexible routes unable to respond to traffic jams or bus breakdowns
+University X currently operates a fixed-route, fixed-schedule campus bus service. However, this traditional model faces several critical issues:
 
-⌛ Unpredictable arrival times, resulting in delays and dissatisfaction
+- 🔴 **Overcrowding during peak hours**, leaving students behind
+- ⚪ **Empty buses during off-peak hours**, leading to resource waste
+- ⚠️ **Inability to reroute** in case of traffic congestion or breakdowns
+- 🕒 **Unreliable arrival times**, causing student and staff delays
 
-To address these issues, we propose a Smart Bus Scheduling System that leverages real-time data, dynamic algorithms, and smart routing to enhance the reliability and efficiency of campus transport.
+---
 
-🌟 Key Features
-Live Data Integration
-Real-time GPS tracking of buses and sensors at bus stops for demand estimation.
+## 💡 Solution Overview
 
-Dynamic Route Adjustment
-Routes and schedules adjust automatically based on traffic conditions and student demand.
+This project introduces a **Smart Bus Scheduling System** that adapts in real-time using **live data** and **intelligent algorithms** to:
 
-Peak Hour Load Balancing
-Intelligent algorithms distribute capacity efficiently to reduce overcrowding.
+- Dynamically adjust routes and schedules based on demand and traffic
+- Reduce inefficiencies and enhance commuter satisfaction
+- Enable proactive communication about delays or disruptions
 
-Smart Alerts
-Notify users of delays, reroutes, or changes in schedule.
+---
 
-Interactive Web Dashboard
-Visualize bus movements, predicted arrival times, and usage analytics.
+## 🌟 Features
 
-📈 Benefits
-✅ Reduces wait time and missed rides
+- ✅ **Real-Time GPS Tracking**  
+  Monitor bus locations and movements live
 
-✅ Minimizes fuel and resource waste
+- 🔄 **Dynamic Route Adjustment**  
+  Automatically reroute based on road conditions and stop demand
 
-✅ Improves student and staff satisfaction
+- 📊 **Peak Hour Load Balancing**  
+  Distribute buses based on predicted and live student demand
 
-✅ Enables scalable, real-time operations management
+- 🔔 **Smart Alerts & Notifications**  
+  Inform users of changes or delays in real-time
 
-🛠️ Tech Stack
-Backend: Spring Boot (Java), RESTful APIs
+- 🗺️ **Interactive Web Dashboard**  
+  Visualize routes, bus locations, and system performance metrics
 
-Frontend: HTML, CSS, JavaScript, Leaflet.js (for maps)
+---
 
-Database: MongoDB
+## 🏗️ Tech Stack
 
+| Layer        | Technology                   |
+|--------------|------------------------------|
+| Backend      | Spring Boot (Java)           |
+| Frontend     | HTML, CSS, JavaScript, Leaflet.js |
+| Database     | MongoDB                      |
+| Algorithms   | Custom demand prediction & route optimization |
 
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/smart-campus-bus-scheduler.git
+cd smart-campus-bus-scheduler
